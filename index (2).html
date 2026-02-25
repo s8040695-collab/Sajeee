@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        body { margin: 0; background: #f7f7f7; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: sans-serif; direction: rtl; }
+        #gameCanvas { background: #fff; border-bottom: 2px solid #535353; width: 100%; max-width: 350px; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 350; canvas.height = 150;
+
+        let score = 0, isGameOver = false, isWin = false;
+        let dino = { x: 50, y: 110, w: 40, h: 40, dy: 0, jump: -12, grav: 0.7, ground: 110 };
+        let obs = { x: 400, speed: 6 };
+
+        function drawDino(x, y) {
+            ctx.fillStyle = "#535353";
+            ctx.fillRect(x + 10, y, 20, 20); // سر
+            ctx.fillRect(x, y + 15, 25, 20); // بدن
+            ctx.fillRect(x + 20, y + 5, 15, 10); // پوزه
+            ctx.fillRect(x + 5, y + 35, 5, 5); ctx.fillRect(x + 20, y + 35, 5, 5); // پاها
+            ctx.fillStyle = "white"; ctx.fillRect(x + 15, y + 5, 4, 4); // چشم
+        }
+
+        function drawGirl(x, y) {
+            ctx.fillStyle = "#ff69b4"; // لباس صورتی
+            ctx.beginPath();
+            ctx.moveTo(x, y + 40); ctx.lineTo(x + 15, y + 10); ctx.lineTo(x + 30, y + 40);
+            ctx.fill();
+            ctx.fillStyle = "#ffdbac"; ctx.fillRect(x + 10, y, 10, 10); // سر
+            ctx.fillStyle = "#4b2c20"; ctx.fillRect(x + 8, y - 2, 14, 4); // مو
+        }
+
+        function drawCactus(x, y) {
+            ctx.fillStyle = "#535353";
+            ctx.fillRect(x + 5, y, 8, 30); // تنه
+            ctx.fillRect(x, y + 10, 4, 10); ctx.fillRect(x + 11, y + 12, 4, 8); // شاخه‌ها
+        }
+
+        function draw() {
+            if (isWin) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawDino(120, 110);
+                drawGirl(170, 105);
+                ctx.fillStyle = "#ff4081"; ctx.font = "bold 24px Tahoma"; ctx.textAlign = "center";
+                ctx.fillText("پایان", canvas.width/2, 50);
+                ctx.font = "14px Tahoma"; ctx.fillText("دایناسور به دختر رسید!", canvas.width/2, 80);
+                return;
+            }
+
+            if (isGameOver) {
+                ctx.fillStyle = "rgba(255,255,255,0.7)"; ctx.fillRect(0,0,350,150);
+                ctx.fillStyle = "#535353"; ctx.font = "bold 20px Arial"; ctx.textAlign = "center";
+                ctx.fillText("GAME OVER", 175, 70);
+                ctx.font = "12px Tahoma"; ctx.fillText("برای شروع دوباره کلیک کنید", 175, 100);
+                return;
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#535353"; ctx.font = "16px Courier"; ctx.textAlign = "left";
+            ctx.fillText(score.toString().padStart(5, '0'), 280, 25);
+
+            dino.dy += dino.grav; dino.y += dino.dy;
+            if (dino.y > dino.ground) { dino.y = dino.ground; dino.dy = 0; }
+
+            if (score >= 100) { isWin = true; return; }
+
+            obs.x -= obs.speed;
+            if (obs.x < -20) { obs.x = 400; score++; obs.speed += 0.1; }
+
+            drawDino(dino.x, dino.y);
+            drawCactus(obs.x, 120);
+
+            if (dino.x < obs.x + 10 && dino.x + 25 > obs.x && dino.y + 35 > 120) isGameOver = true;
+
+            requestAnimationFrame(draw);
+        }
+
+        window.onclick = () => {
+            if (isGameOver || isWin) { 
+                score = 0; obs.x = 400; obs.speed = 6; dino.y = 110; isGameOver = false; isWin = false; draw();
+            } else if (dino.y === dino.ground) dino.dy = dino.jump;
+        };
+        draw();
+    </script>
+</body>
+</html>
+
+
+
